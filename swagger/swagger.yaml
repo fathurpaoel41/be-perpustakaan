@@ -1,0 +1,153 @@
+openapi: 3.0.0
+info:
+  title: category API
+  version: 1.0.0
+  description: API untuk mengelola kategori
+paths:
+  /api/auth/login:
+    post:
+      summary: Login untuk mendapatkan token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              example:
+                email: testing2@gmail.com
+                password: testing123
+      responses:
+        '200':
+          description: Login berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Kredensial tidak valid
+  /category:
+    get:
+      summary: Mendapatkan semua kategori
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Berhasil mendapatkan kategori
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+    post:
+      summary: Membuat kategori baru
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryInput'
+            example:
+              category: "Non-Fiksi"
+      responses:
+        '201':
+          description: Berhasil membuat kategori
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+  /category/{id}:
+    put:
+      summary: Memperbarui kategori
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryInput'
+            example:
+              category: "Non-Fiksi"
+      responses:
+        '200':
+          description: Berhasil memperbarui kategori
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+        '404':
+          description: Kategori tidak ditemukan
+    delete:
+      summary: Menghapus kategori
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Berhasil menghapus kategori
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+        '404':
+          description: Kategori tidak ditemukan
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    CategoryInput:
+      type: object
+      properties:
+        name:
+          type: string
