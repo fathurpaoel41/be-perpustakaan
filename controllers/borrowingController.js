@@ -8,7 +8,7 @@ const NodeCache = require('node-cache');
 const { body, validationResult } = require('express-validator');
 
 
-const cache = new NodeCache();
+const cache = new NodeCache({ stdTTL: 60 }); 
 
 class BorrowingController {
   // Mendapatkan semua data peminjam
@@ -177,7 +177,19 @@ static async filterBorrowings(req, res) {
     const { id_user, id_book, status_peminjaman } = req.body;
 
     const options = {
-      where: {}
+      where: {},
+      include: [
+        {
+          model: Users,
+          attributes: ['nama_user'],
+          required: true //inner join
+        },
+        {
+          model: Books,
+          attributes: ['judul_buku'],
+          required: true
+        }
+      ]
     };
 
     if (id_user) {
@@ -203,7 +215,9 @@ static async filterBorrowings(req, res) {
       const borrow = await Borrow.findAll(options);
 
       // Simpan data ke cache
-      cache.set(cacheKey, borrow);
+      const booksData = borrow.map((book) => book.toJSON());
+
+      cache.set(cacheKey, booksData);
 
       if (borrow.length === 0) {
         return res.status(404).json({ message: 'Data tidak ditemukan' });
