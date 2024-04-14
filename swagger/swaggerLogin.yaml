@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  title: Login API
+  version: 1.0.0
+  description: API untuk login
+paths:
+  /api/auth/login:
+    post:
+      summary: Login untuk mendapatkan token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              example:
+                email: testing2@gmail.com
+                password: testing123
+      responses:
+        '200':
+          description: Login berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Kredensial tidak valid

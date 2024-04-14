@@ -1,0 +1,176 @@
+openapi: 3.0.0
+info:
+  title: Books API
+  version: 1.0.0
+  description: API untuk mengelola buku
+paths:
+  /books:
+    get:
+      summary: Mendapatkan semua buku
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Berhasil mendapatkan buku
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Books'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+    post:
+      summary: Membuat buku baru
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BooksInput'
+            example:
+              id_book: "BKU_001"
+              judul_buku: "Berani Egois"
+              isbn: "jfhjf-dfgdfg-dfgdf-gdfgdf"
+              id_penerbit: "PNB_001"
+              id_penulis: "PNL_001"
+              deskripsi: "Buku Egois beut coy"
+              is_available: true
+              total_buku: "10"
+              id_categories: "CTG_001"
+              gambar: "string/path"
+      responses:
+        '201':
+          description: Berhasil membuat buku
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BooksInput'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+  /books/{id}:
+    put:
+      summary: Memperbarui buku
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BooksInput'
+            example:
+              id_book: "BKU_001"
+              judul_buku: "Berani Egois"
+              isbn: "jfhjf-dfgdfg-dfgdf-gdfgdf"
+              id_penerbit: "PNB_001"
+              id_penulis: "PNL_001"
+              deskripsi: "Buku Egois beut coy"
+              is_available: true
+              total_buku: 10
+              id_categories: "CTG_001"
+              gambar: "string/path"
+      responses:
+        '200':
+          description: Berhasil memperbarui buku
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Books'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+        '404':
+          description: Buku tidak ditemukan
+    delete:
+      summary: Menghapus buku
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Berhasil menghapus buku
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+        '404':
+          description: Buku tidak ditemukan
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Books:
+      type: object
+      properties:
+        gambar:
+          type: string
+        id_book:
+          type: string
+        judul_buku:
+          type: string
+        isbn:
+          type: string
+        id_penerbit:
+          type: string
+        id_penulis:
+          type: string
+        deskripsi:
+          type: string
+        is_available:
+          type: boolean
+        total_buku:
+          type: integer
+        id_categories:
+          type: string
+    BooksInput:
+      type: object
+      properties:
+        id_book:
+          type: string
+        judul_buku:
+          type: string
+        isbn:
+          type: string
+        id_penerbit:
+          type: string
+        id_penulis:
+          type: string
+        deskripsi:
+          type: string
+        is_available:
+          type: boolean
+        total_buku:
+          type: integer
+        id_categories:
+          type: string
+        gambar:
+          type: string
