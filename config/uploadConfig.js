@@ -14,7 +14,9 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   // Hanya menerima file gambar
   if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-    return cb(new Error('Hanya file gambar yang dapat diunggah'), false);
+    // return cb(new Error('Hanya file gambar yang dapat diunggah'), false);
+    console.log("hanya file gambar yang dapat di unggah")
+    return cb(null, false);
   }
   cb(null, true);
 };
