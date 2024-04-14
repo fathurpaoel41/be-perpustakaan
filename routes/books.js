@@ -17,6 +17,6 @@ router.put('/:id', verifyToken, upload.single('gambar'), BooksController.updateB
 router.delete('/:id', verifyToken, BooksController.deleteBook);
 
 // Mendapatkan buku dengan filter
-router.get('/filter', verifyToken, BooksController.filterBooks);
+router.post('/filter', verifyToken, BooksController.filterBooks);
 
 module.exports = router;

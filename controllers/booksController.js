@@ -4,8 +4,13 @@ const { upload, resizeImage } = require('../config/uploadConfig');
 const NodeCache = require('node-cache');
 const fs = require('fs');
 const path = require('path');
-
+const { body, validationResult } = require('express-validator');
 const cache = new NodeCache();
+
+//relasi database
+const Categories = require('../models/CategoriesModel')
+const Penerbit = require('../models/PenerbitModel')
+const Penulis = require('../models/PenulisModel')
 
 class BooksController {
   // Mendapatkan semua data buku
@@ -21,11 +26,31 @@ class BooksController {
       } else {
         // Jika data tidak tersedia di cache, ambil dari database
         const books = await Books.findAll({
-          attributes: { include: ['gambar'] } // Sertakan URL gambar dalam hasil query
+          attributes: { include: ['gambar'] },
+          include: [
+            {
+              model: Categories,
+              attributes: ['category'],
+              required: false //inner join
+            },
+            {
+              model: Penerbit,
+              attributes: ['penerbit'],
+              required: false
+            },
+            {
+              model: Penulis,
+              attributes: ['penulis'],
+              required: false
+            }
+          ]
+           // Sertakan URL gambar dalam hasil query
         });
 
+        const booksData = books.map(book => book.toJSON())
+
         // Simpan data ke cache
-        cache.set(cacheKey, books);
+        cache.set(cacheKey, booksData);
         res.json(books);
       }
     } catch (error) {
@@ -82,6 +107,27 @@ static async createBook(req, res) {
       .isString().withMessage('ID kategori harus berupa teks')
       .trim()
       .isLength({ min: 1 }).withMessage('ID kategori tidak boleh hanya berisi spasi')
+      .run(req);
+    
+    await body('gambar')
+      .custom((value, { req }) => {
+          console.log("file ", req.file)
+          if(req.file == undefined) {
+            throw new Error('File Gambar Tidak Boleh Kosong');
+          }else{
+            const mimeType = req.file.mimetype;
+            
+            if (!['image/jpeg', 'image/png','image/jpg'].includes(mimeType)) {
+              throw new Error('Gambar harus berupa JPG, JPEG, atau PNG');
+            }
+  
+            if(req.file.size >5000000){
+              throw new Error('File Gambar tidak boleh lebih dari 1 MB');
+            }
+          }
+         
+          return true;
+        })
       .run(req);
 
     const errors = validationResult(req);
@@ -176,23 +222,40 @@ static async updateBook(req, res) {
         .trim()
         .isLength({ min: 1 }).withMessage('ID kategori tidak boleh hanya berisi spasi')
         .run(req);
+      
+      await body('gambar')
+        .custom((value, { req }) => {
+            if(req.file == undefined) {
+              throw new Error('File Gambar Tidak Boleh Kosong');
+            }else{
+              const mimeType = req.file.mimetype;
+              
+              if (!['image/jpeg', 'image/png','image/jpg'].includes(mimeType)) {
+                throw new Error('Gambar harus berupa JPG, JPEG, atau PNG');
+              }
+    
+              if(req.file.size >5000000){
+                throw new Error('File Gambar tidak boleh lebih dari 1 MB');
+              }
+            }
+          
+            return true;
+          })
+        .run(req);
   
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
-  
+      const book = await Books.findByPk(req.params.id);
+      const getExistPathGambar = book
       const { judul_buku, isbn, id_penerbit, id_penulis, deskripsi, total_buku, id_categories } = req.body;
   
-      const book = await Books.findByPk(req.params.id);
       if (book) {
         const oldImagePath = book.gambar;
         const gambarPath = req.file ? req.file.path : null;
-        await book.update({ judul_buku, isbn, id_penerbit, id_penulis, deskripsi, total_buku, id_categories, gambar: gambarPath });
-  
-        if (req.file && book.gambar != null) {
+        if(oldImagePath != null){
           const oldImagePathWithoutHost = path.resolve(path.join(__dirname, '..', oldImagePath.replace('http://localhost:4000', '')));
-  
           if (fs.existsSync(oldImagePathWithoutHost)) {
             try {
               await fs.promises.unlink(oldImagePathWithoutHost);
@@ -203,7 +266,13 @@ static async updateBook(req, res) {
           } else {
             console.log('Gambar lama tidak ditemukan:', oldImagePathWithoutHost);
           }
+        }else{
+          console.log("gambar sebelumnya Null")
+        }
+
+        await book.update({ judul_buku, isbn, id_penerbit, id_penulis, deskripsi, total_buku, id_categories, gambar: gambarPath });
   
+        if (req.file && book.gambar != null) {
           book.gambar = req.file.path;
           await book.save();
         }
@@ -224,8 +293,9 @@ static async updateBook(req, res) {
     try {
       const book = await Books.findByPk(req.params.id);
 
-      if (book) {
+      if (book === "") {
         // Menghapus bagian "http://localhost:4000" dari oldImagePath
+        console.log(book)
         const oldImagePathWithoutHost = book.gambar.replace('http://localhost:4000', '');
 
         // Menghapus gambar sebelumnya jika ada
@@ -243,7 +313,17 @@ static async updateBook(req, res) {
         cache.del('books');
         cache.del('filter_book');
         res.json({ message: 'Buku berhasil dihapus' });
-      } else {
+      } 
+      
+      if(book){
+        console.log("masuk 1")
+        await book.destroy();
+        cache.del('books');
+        cache.del('filter_book');
+        res.json({ message: 'Buku berhasil dihapus' });
+      } 
+      else {
+        console.log("masuk 2")
         res.status(404).json({ message: 'Buku tidak ditemukan' });
       }
     } catch (error) {
@@ -257,23 +337,29 @@ static async updateBook(req, res) {
       // Validate request body
       await body('id_penerbit')
         .optional({ nullable: true })
-        .isString().withMessage('ID penerbit harus berupa teks')
+        .isString()
+        .withMessage('ID penerbit harus berupa teks')
         .trim()
-        .isLength({ min: 1 }).withMessage('ID penerbit tidak boleh hanya berisi spasi')
+        .isLength({ min: 1 })
+        .withMessage('ID penerbit tidak boleh hanya berisi spasi')
         .run(req);
   
       await body('id_penulis')
         .optional({ nullable: true })
-        .isString().withMessage('ID penulis harus berupa teks')
+        .isString()
+        .withMessage('ID penulis harus berupa teks')
         .trim()
-        .isLength({ min: 1 }).withMessage('ID penulis tidak boleh hanya berisi spasi')
+        .isLength({ min: 1 })
+        .withMessage('ID penulis tidak boleh hanya berisi spasi')
         .run(req);
   
       await body('id_categories')
         .optional({ nullable: true })
-        .isString().withMessage('ID kategori harus berupa teks')
+        .isString()
+        .withMessage('ID kategori harus berupa teks')
         .trim()
-        .isLength({ min: 1 }).withMessage('ID kategori tidak boleh hanya berisi spasi')
+        .isLength({ min: 1 })
+        .withMessage('ID kategori tidak boleh hanya berisi spasi')
         .run(req);
   
       const errors = validationResult(req);
@@ -284,7 +370,24 @@ static async updateBook(req, res) {
       const { id_penerbit, id_penulis, id_categories } = req.body;
   
       const options = {
-        where: {}
+        where: {},
+        include: [
+          {
+            model: Categories,
+            attributes: ['id_category', 'category'],
+            required: true, // Jika id_categories tersedia, lakukan inner join
+          },
+          {
+            model: Penerbit,
+            attributes: ['id_penerbit', 'penerbit'],
+            required: true, // Jika id_penerbit tersedia, lakukan inner join
+          },
+          {
+            model: Penulis,
+            attributes: ['id_penulis', 'penulis'],
+            required: true // Jika id_penulis tersedia, lakukan inner join
+          },
+        ],
       };
   
       if (id_penerbit) {
@@ -302,22 +405,33 @@ static async updateBook(req, res) {
       const cacheKey = 'filter_book';
       const cachedData = cache.get(cacheKey);
   
-      if (cachedData) {
-        // Jika data tersedia di cache, kirim data dari cache
-        res.json(cachedData);
-      } else {
+     
         // Jika data tidak tersedia di cache, ambil dari database
-        const book = await Books.findAll(options);
+        const book = await Books.findAll({
+          attributes: [
+            'id_book',
+            'judul_buku',
+            'isbn',
+            'id_penerbit',
+            'id_penulis',
+            'deskripsi',
+            'total_buku',
+            'id_categories',
+            'gambar',
+          ],
+          ...options, // Tambahkan opsi filter
+        });
   
         // Simpan data ke cache
-        cache.set(cacheKey, book);
+        const booksData = book.map((book) => book.toJSON());
+        cache.set(cacheKey, booksData);
   
         if (book.length === 0) {
           return res.status(404).json({ message: 'Data tidak ditemukan' });
         }
   
         res.json(book);
-      }
+      
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: 'Server error' });

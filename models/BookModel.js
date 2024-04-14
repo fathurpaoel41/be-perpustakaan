@@ -2,6 +2,9 @@
 
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('./db');
+const Categories = require('./CategoriesModel')
+const Penerbit = require('./PenerbitModel')
+const Penulis = require('./PenulisModel')
 
 const Books = sequelize.define('tb_book', {
   // Define struktur model disini
@@ -44,6 +47,7 @@ const Books = sequelize.define('tb_book', {
   },
   gambar: {
     type: DataTypes.STRING,
+    allowNull: true,
     get() {
       const rawValue = this.getDataValue('gambar');
       return rawValue ? `http://localhost:4000/${rawValue}` : null;
@@ -54,5 +58,18 @@ const Books = sequelize.define('tb_book', {
   timestamps: false,
   tableName: 'tb_book',
 });
+
+// Definisikan asosiasi antara Buku dan category
+Books.belongsTo(Categories, { foreignKey: 'id_categories' });
+Categories.hasMany(Books, { foreignKey: 'id_categories' });
+
+// Definisikan asosiasi antara Buku dan Penerbit
+Books.belongsTo(Penerbit, { foreignKey: 'id_penerbit' });
+Penerbit.hasMany(Books, { foreignKey: 'id_penerbit' });
+
+// Definisikan asosiasi antara Buku dan Penulis
+Books.belongsTo(Penulis, { foreignKey: 'id_penulis' });
+Penulis.hasMany(Books, { foreignKey: 'id_penulis' });
+
 
 module.exports = Books;
