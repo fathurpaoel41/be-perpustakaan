@@ -5,6 +5,8 @@ const { Op } = require('sequelize');
 const DateFormatter = require('../config/DateFormatter');
 const transporter = require('../config/nodemailer.config');
 const NodeCache = require('node-cache');
+const { body, validationResult } = require('express-validator');
+
 
 const cache = new NodeCache();
 
@@ -69,18 +71,6 @@ static async createBorrowing(req, res) {
       .isLength({ min: 1 }).withMessage('ID buku tidak boleh hanya berisi spasi')
       .run(req);
 
-    await body('tanggal_pengembalian')
-      .notEmpty().withMessage('Tanggal pengembalian tidak boleh kosong')
-      .isDate().withMessage('Tanggal pengembalian harus berupa tanggal yang valid')
-      .run(req);
-
-    await body('status_peminjaman')
-      .notEmpty().withMessage('Status peminjaman tidak boleh kosong')
-      .isString().withMessage('Status peminjaman harus berupa teks')
-      .trim()
-      .isLength({ min: 1 }).withMessage('Status peminjaman tidak boleh hanya berisi spasi')
-      .run(req);
-
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -93,12 +83,14 @@ static async createBorrowing(req, res) {
 
     let lastId = 0;
     if (getId) {
-      lastId = parseInt(getId.id_book.split('_')[1]);
+      lastId = parseInt(getId.id_borrowing.split('_')[1]);
     }
 
     const newId = `BRW_${(lastId + 1).toString().padStart(3, '0')}`;
     const dateFormatter = new DateFormatter();
     const formattedDate = dateFormatter.generateTimeNow();
+
+    console.log({newId})
 
     const borrowing = await Borrow.create({
       id_borrowing: newId,
@@ -132,18 +124,6 @@ static async updateBorrowing(req, res) {
       .isString().withMessage('ID buku harus berupa teks')
       .trim()
       .isLength({ min: 1 }).withMessage('ID buku tidak boleh hanya berisi spasi')
-      .run(req);
-
-    await body('tanggal_pengembalian')
-      .optional({ nullable: true })
-      .isDate().withMessage('Tanggal pengembalian harus berupa tanggal yang valid')
-      .run(req);
-
-    await body('status_peminjaman')
-      .optional({ nullable: true })
-      .isString().withMessage('Status peminjaman harus berupa teks')
-      .trim()
-      .isLength({ min: 1 }).withMessage('Status peminjaman tidak boleh hanya berisi spasi')
       .run(req);
 
     const errors = validationResult(req);
@@ -259,6 +239,22 @@ static async filterBorrowings(req, res) {
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: 'Server error' });
+    }
+  }
+
+  static async deleteBorrowing(req, res) {
+    try {
+      const borrow = await Borrow.findByPk(req.params.id);
+      if (borrow) {
+        await borrow.destroy();
+        cache.del('borrow');
+        res.json({ message: 'Pinjaman Buku berhasil dihapus' });
+      } else {
+        res.status(404).json({ message: 'Pinjaman Buku tidak ditemukan' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Terjadi kesalahan server' });
     }
   }
 }

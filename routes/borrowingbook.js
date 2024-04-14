@@ -18,4 +18,7 @@ router.get('/filter', verifyToken, BorrowingController.filterBorrowings);
 // Mengirim email notifikasi
 router.post('/email-notification', verifyToken, BorrowingController.sendEmailNotification);
 
+//menghspu peminjaman buku
+router.delete('/:id', verifyToken, BorrowingController.deleteBorrowing);
+
 module.exports = router;

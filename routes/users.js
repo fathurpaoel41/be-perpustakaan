@@ -7,7 +7,7 @@ const verifyToken = require('../middleware/verifyToken');
 router.get('/', verifyToken, UsersController.getAllUsers);
 
 // GET users with filter by role and date range
-router.get('/filter', verifyToken, UsersController.filterUsers);
+router.post('/filter', verifyToken, UsersController.filterUsers);
 
 // Mendapatkan user berdasarkan ID
 router.get('/:id', verifyToken, UsersController.getUserById);
