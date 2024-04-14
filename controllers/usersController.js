@@ -3,6 +3,8 @@ const User = require('../models/UserModel');
 const { Op } = require('sequelize');
 const transporter = require('../config/nodemailer.config');
 const crypto = require('crypto');
+const { body, validationResult } = require('express-validator');
+
 
 class UsersController {
   // Mendapatkan semua user
