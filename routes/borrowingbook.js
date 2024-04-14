@@ -13,7 +13,7 @@ router.post('/', verifyToken, BorrowingController.createBorrowing);
 router.put('/:id', verifyToken, BorrowingController.updateBorrowing);
 
 // Mendapatkan data peminjaman dengan filter
-router.get('/filter', verifyToken, BorrowingController.filterBorrowings);
+router.post('/filter', verifyToken, BorrowingController.filterBorrowings);
 
 // Mengirim email notifikasi
 router.post('/email-notification', verifyToken, BorrowingController.sendEmailNotification);
