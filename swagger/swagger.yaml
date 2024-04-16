@@ -1,0 +1,1046 @@
+openapi: 3.0.0
+info:
+  title: category API
+  version: 1.0.0
+  description: API untuk mengelola kategori
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login untuk mendapatkan token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              example:
+                email: fathurpaoel41@gmail.com
+                password: fathur12345
+      responses:
+        '200':
+          description: Login berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Kredensial tidak valid
+  /category:
+    get:
+      tags:
+        - Category
+      summary: Mendapatkan semua kategori
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Berhasil mendapatkan kategori
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+    post:
+      tags:
+        - Category
+      summary: Membuat kategori baru
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryInput'
+            example:
+              category: Non-Fiksi
+      responses:
+        '201':
+          description: Berhasil membuat kategori
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+  '/category/{id}':
+    put:
+      tags:
+        - Category
+      summary: Memperbarui kategori
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryInput'
+            example:
+              category: Non-Fiksi
+      responses:
+        '200':
+          description: Berhasil memperbarui kategori
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+        '404':
+          description: Kategori tidak ditemukan
+    delete:
+      tags:
+        - Category
+      summary: Menghapus kategori
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Berhasil menghapus kategori
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+        '404':
+          description: Kategori tidak ditemukan
+  /books:
+    get:
+      tags:
+        - Books
+      summary: Mendapatkan semua Books
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Berhasil mendapatkan Books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Books'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+    post:
+      tags:
+        - Books
+      summary: Membuat Buku baru
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BooksInput'
+            example:
+              id_book: BKU_001
+              judul_buku: Berani Egois
+              isbn: jfhjf-dfgdfg-dfgdf-gdfgdf
+              id_penerbit: PNB_001
+              id_penulis: PNL_001
+              deskripsi: Buku Egois beut coy
+              total_buku: '10'
+              id_categories: CTG_001
+              gambar: string/path
+      responses:
+        '201':
+          description: Berhasil membuat Buku Baru
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BooksInput'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+  '/books/{id}':
+    put:
+      tags:
+        - Books
+      summary: Memperbarui buku
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BooksInput'
+            example:
+              id_book: BKU_001
+              judul_buku: Berani Egois
+              isbn: jfhjf-dfgdfg-dfgdf-gdfgdf
+              id_penerbit: PNB_001
+              id_penulis: PNL_001
+              deskripsi: Buku Egois beut coy
+              total_buku: 10
+              id_categories: CTG_001
+              gambar: string/path
+      responses:
+        '200':
+          description: Berhasil memperbarui kategori
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Books'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+        '404':
+          description: Kategori tidak ditemukan
+    delete:
+      tags:
+        - Books
+      summary: Menghapus Buku
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Berhasil menghapus kategori
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+        '404':
+          description: Kategori tidak ditemukan
+/books/filter:
+  post:
+      tags:
+        - Books
+      summary: Memfilter Buku baru
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BooksFilter'
+            example:
+              id_penerbit: PNB_001
+              id_penulis: PNL_001
+              id_categories: CTG_001
+      responses:
+        '201':
+          description: Berhasil membuat Buku Baru
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BooksInput'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+/borrowingbook:
+  get:
+    tags:
+      - Borrowing Books
+    summary: Mendapatkan semua Buku Pinjaman
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: Berhasil mendapatkan Buku Pinjaman
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Borrowing'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+  post:
+    tags:
+      - Borrowing Books
+    summary: Membuat Buku Pinjaman baru
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BorrowingInput'
+          example:
+            id_user: USR_003
+            id_book: BKU_003
+            status_peminjaman: Dipinjam
+    responses:
+      '201':
+        description: Berhasil membuat Buku Pinjaman Baru
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BorrowingInput'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+'/borrowingbook/{id}':
+  put:
+    tags:
+      - Borrowing Books
+    summary: Memperbarui buku
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BorrowingInput'
+          example:
+            id_user: USR_003
+            id_book: BKU_003
+            status_peminjaman: Dipinjam
+    responses:
+      '200':
+        description: Berhasil memperbarui kategori
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Borrowing'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+      '404':
+        description: Kategori tidak ditemukan
+  delete:
+    tags:
+      - Borrowing Books
+    summary: Menghapus Buku
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Berhasil menghapus kategori
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+      '404':
+        description: Kategori tidak ditemukan
+/borrowingbook/email-notification:
+  post:
+    summary: Email Notification
+    security:
+      - BearerAuth: []
+    tags:
+      - Borrowing Books
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailNotification'
+          example:
+            email: email@gmail.com
+    responses:
+      '200':
+        description: Berhasil mengirim email notifikasi
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailNotificationInput'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+      '404':
+        description: Kategori tidak ditemukan
+/borrowingbook/filter:
+  post:
+    tags:
+      - Borrowing Books
+    summary: Filter Data Pinjaman
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BorrowingFilter'
+          example:
+            id_user: USR_001
+            id_book: BKU_001
+            status_peminjaman: Dipinjam
+    responses:
+      '200':
+        description: Berhasil mendapatkan Data Users
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Borrowing'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+/users:
+  get:
+    tags:
+      - Users
+    summary: Mendapatkan semua Data User
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: Berhasil mendapatkan Data Users
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Users'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+  post:
+    summary: Menambahkan data user
+    tags:
+      - Users
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Users'
+          example:
+            nama_user: Muhammad Fathurachman
+            ttl: '2002-09-05'
+            role: Administrator
+            no_telp: 085157101122
+            alamat: Ciapus
+            email: farah@gmail.com
+            password: farah123
+    responses:
+      '200':
+        description: Berhasil mengirim email notifikasi
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsersInput'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+      '404':
+        description: Kategori tidak ditemukan
+'/users/{id}':
+  put:
+    tags:
+      - Users
+    summary: Memperbarui buku
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UsersInput'
+          example:
+            nama_user: nama_user
+            ttl: 2006-09-09T00:00:00.000Z
+            role: anggota
+            no_telp: 087656767676
+            alamat: jl. palmerah
+            email: email@gmail.com
+    responses:
+      '200':
+        description: Berhasil memperbarui Data Users
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Users'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+      '404':
+        description: Kategori tidak ditemukan
+  delete:
+    tags:
+      - Users
+    summary: Menghapus Users
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Berhasil menghapus data user
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+      '404':
+        description: Kategori tidak ditemukan
+/users/filter:
+  post:
+    tags:
+      - Users
+    summary: Filter Data User
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UsersFilter'
+          example:
+            role: anggota
+            ttlRange:
+              startDate: '1990-01-01'
+              endDate: '2010-12-31'
+    responses:
+      '200':
+        description: Berhasil mendapatkan Data Users
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Users'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+/penulis:
+    get:
+      tags:
+        - Penulis
+      summary: Mendapatkan semua Data Penulis
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Berhasil mendapatkan data penylis
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Penulis'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+    post:
+      tags:
+        - Penulis
+      summary: Menambahkan Data Penulis
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PenulisInput'
+            example:
+              penulis: Pak Yanto
+      responses:
+        '200':
+          description: Berhasil mendapatkan Data Penulis
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Penulis'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+'/penulis/{id}':
+  put:
+    tags:
+      - Penulis
+    summary: Memperbarui Data Penulis
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PenulisInput'
+          example:
+            penulis: JS_Khairen
+    responses:
+      '200':
+        description: Berhasil memperbarui Data Penulis
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Penulis'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+      '404':
+        description: Kategori tidak ditemukan
+  delete:
+    tags:
+      - Penulis
+    summary: Menghapus Data Penulis
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Berhasil menghapus data penulis
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+      '404':
+        description: Kategori tidak ditemukan
+/penerbit:
+    get:
+      tags:
+        - Penerbit
+      summary: Mendapatkan semua Data Penerbit
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Berhasil mendapatkan data Penerbit
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Penerbit'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+    post:
+      tags:
+        - Penerbit
+      summary: Menambahkan Data Penerbit
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PenerbitInput'
+            example:
+              penerbit: Gramedia Bapak
+      responses:
+        '200':
+          description: Berhasil mendapatkan Data Penulis
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Penerbit'
+        '401':
+          description: Tidak terautentikasi
+        '403':
+          description: Tidak terautorisasi
+'/penerbit/{id}':
+  put:
+    tags:
+      - Penerbit
+    summary: Memperbarui Data Penerbit
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PenerbitInput'
+          example:
+            penerbit: JS_Khairen
+    responses:
+      '200':
+        description: Berhasil memperbarui Data Penerbit
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Penerbit'
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+      '404':
+        description: Kategori tidak ditemukan
+  delete:
+    tags:
+      - Penerbit
+    summary: Menghapus Data Penerbit
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Berhasil menghapus data penerbit
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+      '401':
+        description: Tidak terautentikasi
+      '403':
+        description: Tidak terautorisasi
+      '404':
+        description: Kategori tidak ditemukan
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+    CategoryInput:
+      type: object
+      properties:
+        category:
+          type: string
+    Books:
+      type: object
+      properties:
+        gambar:
+          type: string
+        id_book:
+          type: string
+        judul_buku:
+          type: string
+        isbn:
+          type: string
+        id_penerbit:
+          type: string
+        id_penulis:
+          type: string
+        deskripsi:
+          type: string
+        total_buku:
+          type: integer
+        id_categories:
+          type: string
+    BooksInput:
+      type: object
+      properties:
+        id_book:
+          type: string
+        judul_buku:
+          type: string
+        isbn:
+          type: string
+        id_penerbit:
+          type: string
+        id_penulis:
+          type: string
+        deskripsi:
+          type: string
+        total_buku:
+          type: integer
+        id_categories:
+          type: string
+        gambar:
+          type: string
+    BooksFilter:
+      type: object
+      properties:
+        id_penerbit:
+          type: string
+        id_penulis:
+          type: string
+        id_categories:
+          type: string
+    Borrowing:
+      type: array
+      items:
+        type: object
+        properties:
+          id_borrowing:
+            type: string
+          id_user:
+            type: string
+          id_book:
+            type: string
+          tanggal_peminjaman:
+            type: string
+            format: date
+          tanggal_pengembalian:
+            type: string
+            format: date
+          status_peminjaman:
+            type: string
+          tb_user:
+            type: object
+            properties:
+              nama_user:
+                type: string
+          tb_book:
+            type: object
+            properties:
+              judul_buku:
+                type: string
+    BorrowingFilter:
+      type: array
+      items:
+        type: object
+        properties:
+          id_user:
+            type: string
+          id_book:
+            type: string
+          status_peminjaman:
+            type: string
+    BorrowingInput:
+      type: array
+      items:
+        type: object
+        properties:
+          id_user:
+            type: string
+          id_book:
+            type: string
+          status_peminjaman:
+            type: string
+    EmailNotificationInput:
+      type: array
+      items:
+        type: object
+        properties:
+          email:
+            type: string
+    EmailNotification:
+      type: array
+      items:
+        type: object
+        properties:
+          message:
+            type: string
+    Users:
+      type: object
+      properties:
+        id_user:
+          type: string
+        nama_user:
+          type: string
+        ttl:
+          type: string
+          format: date
+        role:
+          type: string
+        no_telp:
+          type: string
+        alamat:
+          type: string
+        email:
+          type: string
+        verifiedEmail:
+          type: boolean
+        verificationToken:
+          type: string
+        password:
+          type: string
+    UsersInput:
+      type: object
+      properties:
+        nama_user:
+          type: string
+        ttl:
+          type: string
+          format: date
+        role:
+          type: string
+        no_telp:
+          type: string
+        alamat:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    UsersFilter:
+      type: object
+      properties:
+        role:
+          type: string
+        ttlRange:
+          type: object
+          properties:
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+    Penulis:
+      type: object
+      properties:
+        id_penulis:
+          type: string
+        penulis:
+          type: string
+    PenulisInput:
+      type: object
+      properties:
+        penulis:
+          type: string
+    Penerbit:
+      type: object
+      properties:
+        id_penerbit:
+          type: string
+        penerbit:
+          type: string
+    PenerbitInput:
+      type: object
+      properties:
+        penerbit:
+          type: string
